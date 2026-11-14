@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}{{ ui.mission_templates }} · {{ ui.app_name }}{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <p class="eyebrow">{{ ui.parent_space }}</p>
+  <h1>{{ ui.mission_templates }}</h1>
+  <div class="button-row">
+    <a class="primary-button" href="{% url 'missions:template_create' %}">{{ ui.create_mission }}</a>
+    <a class="quiet-button" href="{% url 'missions:category_create' %}">{{ ui.create_category }}</a>
+  </div>
+</section>
+<section class="card-grid">
+  {% for mission in templates %}
+    <article class="panel child-card">
+      <p class="eyebrow">{% if request.LANGUAGE_CODE == "ar" and mission.category.name_ar %}{{ mission.category.name_ar }}{% else %}{{ mission.category.name|default:ui.missions }}{% endif %}</p>
+      <h2>{% if request.LANGUAGE_CODE == "ar" and mission.title_ar %}{{ mission.title_ar }}{% else %}{{ mission.title }}{% endif %}</h2>
+      {% if request.LANGUAGE_CODE == "ar" and mission.description_ar %}<p>{{ mission.description_ar }}</p>{% elif mission.description %}<p>{{ mission.description }}</p>{% endif %}
+      <p>
+        {{ ui.suggested_age }} :
+        {% if mission.suggested_age_band == "3-5" %}{{ ui.age_3_5 }}
+        {% elif mission.suggested_age_band == "6-9" %}{{ ui.age_6_9 }}
+        {% elif mission.suggested_age_band == "10+" %}{{ ui.age_10_plus }}
+        {% else %}{{ ui.all_ages }}{% endif %}
+      </p>
+      <p>{{ ui.coins }} : {{ mission.coins_reward }} · {{ ui.xp }} : {{ mission.xp_reward }}</p>
+      <a class="primary-button" href="{% url 'missions:assign' mission.pk %}">{{ ui.assign }}</a>
+      <a class="quiet-button" href="{% url 'missions:template_edit' mission.pk %}">{{ ui.edit }}</a>
+      <form method="post" action="{% url 'missions:template_archive' mission.pk %}" class="inline-form">
+        {% csrf_token %}
+        <button class="quiet-button" type="submit">{{ ui.archive }}</button>
+      </form>
+    </article>
+  {% empty %}
+    <p class="muted">{{ ui.no_templates }}</p>
+  {% endfor %}
+</section>
+{% endblock %}

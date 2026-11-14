@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+
+{% block title %}{{ ui.progression }} · {{ ui.app_name }}{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <p class="eyebrow">{% if can_award %}{{ ui.parent_space }}{% else %}{{ ui.child_space }}{% endif %}</p>
+  <h1>{{ child.first_name }} · {{ ui.progression }}</h1>
+</section>
+<section class="panel child-card">
+  {% if request.LANGUAGE_CODE == "ar" %}
+    <h2>{{ ui.level }} {{ summary.level.current_level.level }} — {{ summary.level.current_level.name_ar }}</h2>
+  {% else %}
+    <h2>{{ ui.level }} {{ summary.level.current_level.level }} — {{ summary.level.current_level.name }}</h2>
+  {% endif %}
+  <p>{{ ui.xp }} : {{ summary.balances.xp }}</p>
+  <progress class="xp-progress" max="100" value="{{ summary.level.progress_percent }}">{{ summary.level.progress_percent }}%</progress>
+  {% if summary.level.next_level %}
+    <p>{{ ui.xp_to_next }} : {{ summary.level.xp_remaining }}</p>
+  {% else %}
+    <p>{{ ui.max_level }}</p>
+  {% endif %}
+  <p>{{ ui.coins }} : {{ summary.balances.coins }}</p>
+</section>
+
+{% if can_award %}
+  <div class="button-row">
+    <a class="primary-button" href="{% url 'progression:adjust_balance' child.pk %}">{{ ui.adjust_balance }}</a>
+  </div>
+{% endif %}
+
+<section class="hero">
+  <h2>{{ ui.balance_history }}</h2>
+</section>
+<section class="panel">
+  <h3>{{ ui.coin_history }}</h3>
+  <ul>
+    {% for item in summary.coin_history %}
+      <li>
+        <time datetime="{{ item.created_at|date:'c' }}">{{ item.created_at|date:"j F Y H:i" }}</time>
+        · {% if item.amount_delta > 0 %}+{% endif %}{{ item.amount_delta }} {{ ui.coins }}
+        · {% if item.kind == "mission" %}{{ ui.missions }}{% elif item.kind == "habit" %}{{ ui.habits }}{% elif item.kind == "reward" %}{{ ui.rewards }}{% elif item.kind == "adjustment" %}{{ ui.adjustment_kind }}{% else %}{{ ui.correction_kind }}{% endif %}
+        · {{ ui.reason }} : {{ item.reason }}
+        {% if item.actor %}({{ item.actor.first_name|default:item.actor.username }}){% endif %}
+      </li>
+    {% empty %}
+      <li class="muted">{{ ui.no_balance_history }}</li>
+    {% endfor %}
+  </ul>
+</section>
+<section class="panel">
+  <h3>{{ ui.xp_history }}</h3>
+  <ul>
+    {% for item in summary.xp_history %}
+      <li>
+        <time datetime="{{ item.created_at|date:'c' }}">{{ item.created_at|date:"j F Y H:i" }}</time>
+        · {% if item.amount_delta > 0 %}+{% endif %}{{ item.amount_delta }} {{ ui.xp }}
+        · {% if item.kind == "mission" %}{{ ui.missions }}{% elif item.kind == "habit" %}{{ ui.habits }}{% elif item.kind == "adjustment" %}{{ ui.adjustment_kind }}{% else %}{{ ui.correction_kind }}{% endif %}
+        · {{ ui.reason }} : {{ item.reason }}
+        {% if item.actor %}({{ item.actor.first_name|default:item.actor.username }}){% endif %}
+      </li>
+    {% empty %}
+      <li class="muted">{{ ui.no_balance_history }}</li>
+    {% endfor %}
+  </ul>
+</section>
+
+<section class="hero">
+  <h2>{{ ui.badges }}</h2>
+</section>
+<section class="card-grid">
+  {% for award in summary.badge_awards %}
+    <article class="panel badge-card">
+      <span class="badge-icon" aria-hidden="true">
+        {% if award.badge.icon == "mission" %}✓
+        {% elif award.badge.icon == "calendar" %}◷
+        {% elif award.badge.icon == "home" %}⌂
+        {% elif award.badge.icon == "book" %}▤
+        {% elif award.badge.icon == "autonomy" %}◆
+        {% elif award.badge.icon == "clock" %}◴
+        {% elif award.badge.icon == "heart" %}♥
+        {% elif award.badge.icon == "team" %}♧
+        {% elif award.badge.icon == "family" %}⌂
+        {% elif award.badge.icon == "coin" %}●
+        {% elif award.badge.icon == "crown" %}♛
+        {% else %}★{% endif %}
+      </span>
+      <h3>{% if request.LANGUAGE_CODE == "ar" %}{{ award.badge.name_ar }}{% else %}{{ award.badge.name }}{% endif %}</h3>
+      <p>{% if request.LANGUAGE_CODE == "ar" %}{{ award.badge.description_ar }}{% else %}{{ award.badge.description }}{% endif %}</p>
+      <p class="muted">{{ award.awarded_at|date:"j F Y" }}</p>
+    </article>
+  {% empty %}
+    <p class="muted">{{ ui.no_badges }}</p>
+  {% endfor %}
+</section>
+
+{% if can_award %}
+  <section class="panel form-panel">
+    <h2>{{ ui.award_badge }}</h2>
+    <form method="post" class="form-stack">
+      {% csrf_token %}
+      {{ form.badge.errors }}
+      <label for="{{ form.badge.id_for_label }}">{{ form.badge.label }}</label>
+      {{ form.badge }}
+      <label class="confirmation-check">
+        {{ form.confirm }}
+        <span>{{ form.confirm.label }}</span>
+      </label>
+      {{ form.confirm.errors }}
+      <button class="primary-button" type="submit">{{ ui.award_badge }}</button>
+    </form>
+  </section>
+{% endif %}
+{% endblock %}

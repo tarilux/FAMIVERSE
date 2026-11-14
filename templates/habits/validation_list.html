@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block title %}{{ ui.habit_validation }} · {{ ui.app_name }}{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <p class="eyebrow">{{ ui.parent_space }}</p>
+  <h1>{{ ui.habit_validation }}</h1>
+</section>
+<section class="card-grid">
+  {% for occurrence in occurrences %}
+    <article class="panel child-card">
+      <h2>{% if request.LANGUAGE_CODE == "ar" and occurrence.title_ar %}{{ occurrence.title_ar }}{% else %}{{ occurrence.title }}{% endif %}</h2>
+      <p>{{ occurrence.child.first_name }} · {{ occurrence.scheduled_date|date:"l d F Y" }}</p>
+      {% if occurrence.child_note %}<p>{{ occurrence.child_note }}</p>{% endif %}
+      <div class="button-row">
+        <a class="primary-button" href="{% url 'habits:decide' occurrence.pk 'approve' %}">{{ ui.approve_habit }}</a>
+        <a class="quiet-button" href="{% url 'habits:decide' occurrence.pk 'reject' %}">{{ ui.reject_habit }}</a>
+      </div>
+    </article>
+  {% empty %}
+    <p class="muted">{{ ui.no_habit_approvals }}</p>
+  {% endfor %}
+</section>
+{% endblock %}

@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block title %}{{ ui.notifications }} · {{ ui.app_name }}{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <h1>{{ ui.notifications }}</h1>
+</section>
+<section class="card-grid">
+  {% for item in notifications %}
+    <article class="panel child-card notification-card{% if not item.read_at %} notification-unread{% endif %}">
+      <h2>
+        {% if request.LANGUAGE_CODE == "ar" %}{{ item.title_ar }}{% else %}{{ item.title }}{% endif %}
+      </h2>
+      {% if item.body or item.body_ar %}
+        <p>{% if request.LANGUAGE_CODE == "ar" and item.body_ar %}{{ item.body_ar }}{% else %}{{ item.body }}{% endif %}</p>
+      {% endif %}
+      {% if item.message.expires_at and item.message.expires_at <= now %}<p class="muted">{{ ui.message_expired }}</p>{% endif %}
+      <p class="muted">{{ item.created_at|date:"j F Y H:i" }}</p>
+      <div class="button-row">
+        {% if item.kind == "new_message" %}
+          <a class="quiet-button" href="{% url 'communications:message_inbox' %}">{{ ui.message_inbox }}</a>
+        {% elif item.kind == "mission_submitted" %}
+          <a class="quiet-button" href="{% url 'missions:validation_list' %}">{{ ui.pending_approvals }}</a>
+        {% elif item.kind == "mission_assigned" or item.kind == "mission_approved" or item.kind == "mission_rejected" %}
+          <a class="quiet-button" href="{% url 'missions:my_missions' %}">{{ ui.my_missions }}</a>
+        {% elif item.kind == "habit_submitted" %}
+          <a class="quiet-button" href="{% url 'habits:validation_list' %}">{{ ui.habit_validation }}</a>
+        {% elif item.kind == "habit_approved" or item.kind == "habit_rejected" %}
+          <a class="quiet-button" href="{% url 'habits:my_planning' %}">{{ ui.my_planning }}</a>
+        {% elif item.kind == "reward_requested" %}
+          <a class="quiet-button" href="{% url 'rewards:request_list' %}">{{ ui.reward_requests }}</a>
+        {% elif item.kind == "reward_accepted" or item.kind == "reward_rejected" %}
+          <a class="quiet-button" href="{% url 'rewards:shop' %}">{{ ui.reward_shop }}</a>
+        {% endif %}
+        {% if item.read_at %}
+          <form method="post" action="{% url 'communications:notification_read' item.pk 'unread' %}">
+            {% csrf_token %}
+            <button class="quiet-button" type="submit">{{ ui.mark_unread }}</button>
+          </form>
+        {% else %}
+          <form method="post" action="{% url 'communications:notification_read' item.pk 'read' %}">
+            {% csrf_token %}
+            <button class="primary-button" type="submit">{{ ui.mark_read }}</button>
+          </form>
+        {% endif %}
+      </div>
+    </article>
+  {% empty %}
+    <p class="muted">{{ ui.no_notifications }}</p>
+  {% endfor %}
+</section>
+{% endblock %}

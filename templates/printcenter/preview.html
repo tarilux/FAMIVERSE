@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}{{ ui.print_preview }} · {{ ui.app_name }}{% endblock %}
+{% block content %}
+<p class="screen-only"><a href="{% url 'printcenter:center' %}">{{ ui.back }}</a></p>
+<p class="notice screen-only">{{ ui.print_hardware_pending }}</p>
+<article class="thermal-paper" lang="{{ request.LANGUAGE_CODE }}" dir="{{ ui_direction }}">
+  <header class="thermal-header">
+    <strong class="thermal-wordmark">FAMIVERSE</strong>
+    <p>{{ job.snapshot.child_name }}</p>
+    <p>{{ job.snapshot.date }}</p>
+  </header>
+  {% if job.kind == "missions" %}
+    <h1>{{ ui.print_missions_title }}</h1>
+    <ul class="thermal-missions">
+      {% for mission in job.snapshot.missions %}
+        <li>
+          <span class="thermal-checkbox" aria-hidden="true"></span>
+          <div>
+            <strong>{% if request.LANGUAGE_CODE == "ar" and mission.title_ar %}{{ mission.title_ar }}{% else %}{{ mission.title }}{% endif %}</strong>
+            {% if request.LANGUAGE_CODE == "ar" and mission.description_ar %}
+              <p>{{ mission.description_ar }}</p>
+            {% elif mission.description %}
+              <p>{{ mission.description }}</p>
+            {% endif %}
+          </div>
+        </li>
+      {% endfor %}
+    </ul>
+    {% if job.snapshot.parent_message or job.snapshot.parent_message_ar %}
+      <section class="thermal-message">
+        <h2>{{ ui.print_parent_message }}</h2>
+        <p>{% if request.LANGUAGE_CODE == "ar" and job.snapshot.parent_message_ar %}{{ job.snapshot.parent_message_ar }}{% else %}{{ job.snapshot.parent_message }}{% endif %}</p>
+      </section>
+    {% endif %}
+  {% else %}
+    <h1>{{ ui.print_progress_title }}</h1>
+    <dl class="thermal-stats">
+      <dt>{{ ui.print_level }}</dt>
+      <dd>{% if request.LANGUAGE_CODE == "ar" and job.snapshot.level_ar %}{{ job.snapshot.level_ar }}{% else %}{{ job.snapshot.level|default:"—" }}{% endif %}</dd>
+      <dt>{{ ui.print_coins }}</dt>
+      <dd>{{ job.snapshot.coins }}</dd>
+      <dt>{{ ui.print_coins_today }}</dt>
+      <dd>{{ job.snapshot.coins_today }}</dd>
+      <dt>{{ ui.print_xp }}</dt>
+      <dd>{{ job.snapshot.xp }}</dd>
+      <dt>{{ ui.print_xp_today }}</dt>
+      <dd>{{ job.snapshot.xp_today }}</dd>
+    </dl>
+    {% if job.snapshot.rewards %}
+      <section>
+        <h2>{{ ui.print_rewards }}</h2>
+        <ul class="thermal-list">
+          {% for reward in job.snapshot.rewards %}
+            <li>{% if request.LANGUAGE_CODE == "ar" and reward.name_ar %}{{ reward.name_ar }}{% else %}{{ reward.name }}{% endif %} — {{ reward.price_coins }} {{ ui.coins }}</li>
+          {% endfor %}
+        </ul>
+      </section>
+    {% endif %}
+  {% endif %}
+  <footer class="thermal-footer">{{ ui.app_name }}</footer>
+</article>
+<p class="muted screen-only">{{ ui.print_logo_pending }}</p>
+{% endblock %}

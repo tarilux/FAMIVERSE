@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}{{ ui.reward_shop }} · {{ ui.app_name }}{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <p class="eyebrow">{{ ui.child_space }}</p>
+  <h1>{{ ui.reward_shop }}</h1>
+  <p>{{ ui.coins }} : {{ balance }}</p>
+</section>
+<section class="card-grid">
+  {% for reward in rewards %}
+    <article class="panel child-card">
+      <p class="eyebrow">
+        {% if reward.category == "screens" %}{{ ui.reward_screens }}
+        {% elif reward.category == "food" %}{{ ui.reward_food }}
+        {% elif reward.category == "privileges" %}{{ ui.reward_privileges }}
+        {% elif reward.category == "outings" %}{{ ui.reward_outings }}
+        {% else %}{{ ui.reward_material }}{% endif %}
+      </p>
+      <h2>{% if request.LANGUAGE_CODE == "ar" and reward.name_ar %}{{ reward.name_ar }}{% else %}{{ reward.name }}{% endif %}</h2>
+      {% if reward.description or reward.description_ar %}
+        <p>{% if request.LANGUAGE_CODE == "ar" and reward.description_ar %}{{ reward.description_ar }}{% else %}{{ reward.description }}{% endif %}</p>
+      {% endif %}
+      <p>{{ ui.price }} : {{ reward.price_coins }} {{ ui.coins }}</p>
+      {% if reward.already_requested %}
+        <p class="muted">{{ ui.reward_pending }}</p>
+      {% elif reward.affordable %}
+        <form method="post" action="{% url 'rewards:request' reward.pk %}">
+          {% csrf_token %}
+          <button class="primary-button" type="submit">{{ ui.request_reward }}</button>
+        </form>
+      {% else %}
+        <p class="muted">{{ ui.not_enough_coins }}</p>
+      {% endif %}
+    </article>
+  {% empty %}
+    <p class="muted">{{ ui.no_rewards }}</p>
+  {% endfor %}
+</section>
+
+<section class="hero">
+  <h2>{{ ui.reward_history }}</h2>
+</section>
+<section class="card-grid">
+  {% for item in history %}
+    <article class="panel child-card">
+      <h3>{% if request.LANGUAGE_CODE == "ar" and item.reward.name_ar %}{{ item.reward.name_ar }}{% else %}{{ item.reward.name }}{% endif %}</h3>
+      <p>{{ ui.price }} : {{ item.price_coins }} {{ ui.coins }} · {{ item.requested_at|date:"j F Y" }}</p>
+      <p>
+        {% if item.status == "pending" %}{{ ui.reward_pending }}
+        {% elif item.status == "accepted" %}{{ ui.reward_accepted }}
+        {% else %}{{ ui.reward_rejected }}{% endif %}
+      </p>
+      {% if item.parent_note %}<p>{{ item.parent_note }}</p>{% endif %}
+    </article>
+  {% empty %}
+    <p class="muted">{{ ui.no_reward_history }}</p>
+  {% endfor %}
+</section>
+{% endblock %}

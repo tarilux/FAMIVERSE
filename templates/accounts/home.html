@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block content %}
+{% if user.is_parent %}
+  <section class="hero">
+    <p class="eyebrow">{{ ui.app_name }}</p>
+    <h1>{{ ui.welcome }}, {{ user.first_name|default:user.username }}</h1>
+    <p>{{ ui.parent_space }}</p>
+  </section>
+  <div class="button-row dashboard-links">
+    <a class="primary-button" href="{% url 'missions:template_list' %}">{{ ui.missions }}</a>
+    <a class="primary-button" href="{% url 'habits:template_list' %}">{{ ui.habits }}</a>
+    <a class="primary-button" href="{% url 'habits:planning' %}">{{ ui.planning }}</a>
+    <a class="primary-button" href="{% url 'rewards:catalog' %}">{{ ui.reward_catalog }}</a>
+    <a class="primary-button" href="{% url 'rewards:request_list' %}">{{ ui.reward_requests }}</a>
+    <a class="primary-button" href="{% url 'communications:sent_messages' %}">{{ ui.messages }}</a>
+  </div>
+  <section class="section-heading" id="children">
+    <h2>{{ ui.children }}</h2>
+    <a class="primary-button" href="{% url 'accounts:child_create' %}">{{ ui.add_child }}</a>
+  </section>
+  <section class="card-grid">
+    {% for child in children %}
+      <article class="panel child-card">
+        {% if child.avatar %}
+          <img class="avatar" src="{% url 'accounts:child_avatar' child.pk %}" alt="">
+        {% else %}
+          <span class="avatar avatar-placeholder" aria-hidden="true">{{ child.first_name|first }}</span>
+        {% endif %}
+        <h3>{{ child.first_name }}</h3>
+        <p>{{ ui.age }} : {{ child.age }} {{ ui.years }}</p>
+        <p>{{ ui.level }} {{ child.level.current_level.level }} : {% if request.LANGUAGE_CODE == "ar" %}{{ child.level.current_level.name_ar }}{% else %}{{ child.level.current_level.name }}{% endif %}</p>
+        <p>{{ ui.coins }} : {{ child.balances.coins }} · {{ ui.xp }} : {{ child.balances.xp }}</p>
+        <a class="quiet-button" href="{% url 'progression:child_progress' child.pk %}">{{ ui.progress_details }}</a>
+        <a class="quiet-button" href="{% url 'progression:adjust_balance' child.pk %}">{{ ui.adjust_balance }}</a>
+      </article>
+    {% empty %}
+      <p class="muted">{{ ui.no_children }}</p>
+    {% endfor %}
+  </section>
+{% else %}
+  <section class="hero child-hero">
+    <p class="eyebrow">{{ ui.child_space }}</p>
+    <h1>{{ ui.welcome }}, {{ profile.first_name }}</h1>
+    <div class="child-summary">
+      {% if profile.avatar %}
+        <img class="avatar avatar-large" src="{% url 'accounts:child_avatar' profile.pk %}" alt="">
+      {% else %}
+        <span class="avatar avatar-large avatar-placeholder" aria-hidden="true">{{ profile.first_name|first }}</span>
+      {% endif %}
+      <p>{{ ui.age }} : {{ profile.age }} {{ ui.years }}</p>
+      <p>{{ ui.level }} {{ progress.level.current_level.level }} : {% if request.LANGUAGE_CODE == "ar" %}{{ progress.level.current_level.name_ar }}{% else %}{{ progress.level.current_level.name }}{% endif %}</p>
+      <p>{{ ui.coins }} : {{ progress.balances.coins }} · {{ ui.xp }} : {{ progress.balances.xp }}</p>
+      <progress class="xp-progress" max="100" value="{{ progress.level.progress_percent }}">{{ progress.level.progress_percent }}%</progress>
+      <p>{{ ui.badges }} :
+        {% for award in progress.badge_awards|slice:":3" %}
+          {% if request.LANGUAGE_CODE == "ar" %}{{ award.badge.name_ar }}{% else %}{{ award.badge.name }}{% endif %}{% if not forloop.last %}, {% endif %}
+        {% empty %}{{ ui.no_badges }}{% endfor %}
+      </p>
+    </div>
+  </section>
+  <div class="button-row dashboard-links">
+    <a class="primary-button" href="{% url 'habits:my_planning' %}">{{ ui.my_planning }}</a>
+    <a class="primary-button" href="{% url 'missions:my_missions' %}">{{ ui.my_missions }}</a>
+    <a class="primary-button" href="{% url 'progression:my_progress' %}">{{ ui.progression }}</a>
+    <a class="primary-button" href="{% url 'rewards:shop' %}">{{ ui.reward_shop }}</a>
+    <a class="primary-button" href="{% url 'communications:message_inbox' %}">{{ ui.my_messages }}</a>
+    <a class="primary-button" href="{% url 'communications:notification_list' %}">{{ ui.notifications }}</a>
+  </div>
+{% endif %}
+{% endblock %}

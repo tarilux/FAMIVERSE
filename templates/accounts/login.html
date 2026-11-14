@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}{{ ui.login_title }} · {{ ui.app_name }}{% endblock %}
+
+{% block content %}
+<section class="panel login-panel">
+  <p class="eyebrow">{{ ui.tagline }}</p>
+  <h1>{{ ui.login_title }}</h1>
+  <form method="post" class="form-stack">
+    {% csrf_token %}
+    <input type="hidden" name="next" value="{{ request.GET.next }}">
+    {% if form.non_field_errors %}
+      <p class="form-error" role="alert">
+        {% if form.non_field_errors.0 == "locked" %}{{ ui.login_locked }}{% else %}{{ ui.login_error }}{% endif %}
+      </p>
+    {% endif %}
+    <label for="{{ form.username.id_for_label }}">{{ ui.username }}</label>
+    {{ form.username }}
+    {{ form.username.errors }}
+    <label for="{{ form.pin.id_for_label }}">{{ ui.pin }}</label>
+    {{ form.pin }}
+    {{ form.pin.errors }}
+    <button class="primary-button" type="submit">{{ ui.login_button }}</button>
+  </form>
+</section>
+{% endblock %}

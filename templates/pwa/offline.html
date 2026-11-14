@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="{{ request.LANGUAGE_CODE }}" dir="{{ ui_direction }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#21143f">
+  <title>{% if request.LANGUAGE_CODE == "ar" %}غير متصل - FAMIVERSE{% else %}Hors connexion - FAMIVERSE{% endif %}</title>
+  <link rel="stylesheet" href="/static/css/app.css">
+</head>
+<body>
+  <main class="page panel form-panel">
+    {% if request.LANGUAGE_CODE == "ar" %}
+      <h1>أنت غير متصل بالإنترنت</h1>
+      <p>اتصل بالشبكة مجدداً للوصول إلى بيانات FAMIVERSE.</p>
+    {% else %}
+      <h1>Vous êtes hors connexion</h1>
+      <p>Reconnectez-vous au réseau pour consulter les données de FAMIVERSE.</p>
+    {% endif %}
+  </main>
+</body>
+</html>

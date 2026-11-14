@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block title %}{{ ui.create_category }} · {{ ui.app_name }}{% endblock %}
+
+{% block content %}
+<section class="panel form-panel">
+  <h1>{{ ui.create_category }}</h1>
+  {% if error %}<p class="form-error" role="alert">{{ error|join:" " }}</p>{% endif %}
+  <form method="post" class="form-stack">
+    {% csrf_token %}
+    <label for="{{ form.name.id_for_label }}">{{ ui.category_name }}</label>
+    {{ form.name }}{{ form.name.errors }}
+    <label for="{{ form.name_ar.id_for_label }}">{{ ui.category_name_ar }}</label>
+    {{ form.name_ar }}{{ form.name_ar.errors }}
+    <button class="primary-button" type="submit">{{ ui.save }}</button>
+  </form>
+</section>
+{% endblock %}

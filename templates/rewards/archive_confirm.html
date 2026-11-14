@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block title %}{{ ui.archive }} · {{ ui.app_name }}{% endblock %}
+
+{% block content %}
+<section class="panel form-panel">
+  <h1>{{ ui.archive }}</h1>
+  <p>{{ ui.archive_reward_prompt }} <strong>{{ reward.name }}</strong></p>
+  <form method="post" class="form-stack">
+    {% csrf_token %}
+    <label class="confirmation-check">
+      <input type="checkbox" name="confirm" value="yes" required>
+      <span>{{ ui.confirm_action }}</span>
+    </label>
+    <div class="button-row">
+      <button class="primary-button" type="submit">{{ ui.archive }}</button>
+      <a class="quiet-button" href="{% url 'rewards:catalog' %}">{{ ui.cancel }}</a>
+    </div>
+  </form>
+</section>
+{% endblock %}

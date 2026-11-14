@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block title %}{{ ui.create_habit }} · {{ ui.app_name }}{% endblock %}
+
+{% block content %}
+<section class="panel form-panel">
+  <h1>{% if editing %}{{ ui.edit_habit }}{% else %}{{ ui.create_habit }}{% endif %}</h1>
+  <form method="post" class="form-stack">
+    {% csrf_token %}
+    {% if form.non_field_errors %}<div class="form-error">{{ form.non_field_errors }}</div>{% endif %}
+    <label for="{{ form.title.id_for_label }}">{{ ui.habit_title }}</label>
+    {{ form.title }}{{ form.title.errors }}
+    <label for="{{ form.title_ar.id_for_label }}">{{ ui.habit_title_ar }}</label>
+    {{ form.title_ar }}{{ form.title_ar.errors }}
+    <label for="{{ form.description.id_for_label }}">{{ ui.habit_description }}</label>
+    {{ form.description }}{{ form.description.errors }}
+    <label for="{{ form.description_ar.id_for_label }}">{{ ui.habit_description_ar }}</label>
+    {{ form.description_ar }}{{ form.description_ar.errors }}
+    <label for="{{ form.frequency.id_for_label }}">{{ ui.frequency }}</label>
+    {{ form.frequency }}{{ form.frequency.errors }}
+    <fieldset class="check-list">
+      <legend>{{ ui.weekdays }}</legend>
+      {{ form.weekdays }}{{ form.weekdays.errors }}
+    </fieldset>
+    <label for="{{ form.time_of_day.id_for_label }}">{{ ui.time_of_day }}</label>
+    {{ form.time_of_day }}{{ form.time_of_day.errors }}
+    <label for="{{ form.scheduled_time.id_for_label }}">{{ ui.scheduled_time }}</label>
+    {{ form.scheduled_time }}{{ form.scheduled_time.errors }}
+    <fieldset class="check-list">
+      <legend>{{ ui.children_assigned }}</legend>
+      {{ form.children }}{{ form.children.errors }}
+    </fieldset>
+    <div class="reward-fields">
+      <div>
+        <label for="{{ form.coins_reward.id_for_label }}">{{ ui.coins }}</label>
+        {{ form.coins_reward }}{{ form.coins_reward.errors }}
+      </div>
+      <div>
+        <label for="{{ form.xp_reward.id_for_label }}">{{ ui.xp }}</label>
+        {{ form.xp_reward }}{{ form.xp_reward.errors }}
+      </div>
+    </div>
+    <div class="button-row">
+      <button class="primary-button" type="submit">{{ ui.save }}</button>
+      <a class="quiet-button" href="{% url 'habits:template_list' %}">{{ ui.cancel }}</a>
+    </div>
+  </form>
+</section>
+{% endblock %}

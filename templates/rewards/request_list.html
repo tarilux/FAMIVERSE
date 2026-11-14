@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block title %}{{ ui.reward_requests }} · {{ ui.app_name }}{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <p class="eyebrow">{{ ui.parent_space }}</p>
+  <h1>{{ ui.reward_requests }}</h1>
+</section>
+<section class="card-grid">
+  {% for item in reward_requests %}
+    <article class="panel child-card">
+      <h2>{% if request.LANGUAGE_CODE == "ar" and item.reward.name_ar %}{{ item.reward.name_ar }}{% else %}{{ item.reward.name }}{% endif %}</h2>
+      <p>{{ item.child.first_name }} · {{ ui.price }} : {{ item.price_coins }} {{ ui.coins }}</p>
+      <p>{{ item.requested_at|date:"j F Y H:i" }}</p>
+      <p>
+        {% if item.status == "pending" %}{{ ui.reward_pending }}
+        {% elif item.status == "accepted" %}{{ ui.reward_accepted }}
+        {% else %}{{ ui.reward_rejected }}{% endif %}
+      </p>
+      {% if item.status == "pending" %}
+        <div class="button-row">
+          <a class="primary-button" href="{% url 'rewards:decide_request' item.pk 'approve' %}">{{ ui.reward_accept }}</a>
+          <a class="quiet-button" href="{% url 'rewards:decide_request' item.pk 'reject' %}">{{ ui.reward_reject }}</a>
+        </div>
+      {% elif item.parent_note %}
+        <p>{{ item.parent_note }}</p>
+      {% endif %}
+    </article>
+  {% empty %}
+    <p class="muted">{{ ui.no_reward_requests }}</p>
+  {% endfor %}
+</section>
+{% endblock %}

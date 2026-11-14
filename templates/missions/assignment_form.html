@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block title %}{{ ui.assign }} · {{ ui.app_name }}{% endblock %}
+
+{% block content %}
+<section class="panel form-panel">
+  <p class="eyebrow">{{ ui.assign }}</p>
+  <h1>{% if request.LANGUAGE_CODE == "ar" and template.title_ar %}{{ template.title_ar }}{% else %}{{ template.title }}{% endif %}</h1>
+  <p>{{ ui.coins }} : {{ template.coins_reward }} · {{ ui.xp }} : {{ template.xp_reward }}</p>
+  {% if error %}<p class="form-error" role="alert">{{ error|join:" " }}</p>{% endif %}
+  <form method="post" class="form-stack">
+    {% csrf_token %}
+    <fieldset class="check-list">
+      <legend>{{ ui.select_children }}</legend>
+      {{ form.children }}{{ form.children.errors }}
+    </fieldset>
+    <label for="{{ form.due_date.id_for_label }}">{{ ui.due_date }}</label>
+    {{ form.due_date }}{{ form.due_date.errors }}
+    <div class="button-row">
+      <button class="primary-button" type="submit">{{ ui.assign }}</button>
+      <a class="quiet-button" href="{% url 'missions:template_list' %}">{{ ui.cancel }}</a>
+    </div>
+  </form>
+</section>
+{% endblock %}

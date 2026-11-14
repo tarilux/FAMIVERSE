@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}{{ ui.message_inbox }} · {{ ui.app_name }}{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <p class="eyebrow">{{ ui.child_space }}</p>
+  <h1>{{ ui.message_inbox }}</h1>
+</section>
+<section class="card-grid">
+  {% for delivery in deliveries %}
+    <article class="panel child-card">
+      <p class="eyebrow">
+        {% if delivery.read_at %}{{ ui.message_read }}{% else %}{{ ui.message_unread }}{% endif %}
+        {% if delivery.message.expires_at and delivery.message.expires_at <= now %} · {{ ui.message_expired }}{% endif %}
+      </p>
+      <p class="muted">
+        {{ delivery.message.author.first_name|default:delivery.message.author.username }}
+        · {{ delivery.message.created_at|date:"j F Y H:i" }}
+      </p>
+      <p>{% if request.LANGUAGE_CODE == "ar" and delivery.message.content_ar %}{{ delivery.message.content_ar }}{% else %}{{ delivery.message.content }}{% endif %}</p>
+      {% if delivery.message.expires_at %}<p>{{ ui.message_expires }} : {{ delivery.message.expires_at|date:"j F Y H:i" }}</p>{% endif %}
+      {% if delivery.read_at %}
+        <form method="post" action="{% url 'communications:message_read' delivery.pk 'unread' %}">
+          {% csrf_token %}
+          <button class="quiet-button" type="submit">{{ ui.mark_unread }}</button>
+        </form>
+      {% else %}
+        <form method="post" action="{% url 'communications:message_read' delivery.pk 'read' %}">
+          {% csrf_token %}
+          <button class="primary-button" type="submit">{{ ui.mark_read }}</button>
+        </form>
+      {% endif %}
+    </article>
+  {% empty %}
+    <p class="muted">{{ ui.no_messages }}</p>
+  {% endfor %}
+</section>
+{% endblock %}

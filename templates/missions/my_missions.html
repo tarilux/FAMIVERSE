@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}{{ ui.my_missions }} · {{ ui.app_name }}{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <p class="eyebrow">{{ ui.child_space }}</p>
+  <h1>{{ ui.my_missions }}</h1>
+</section>
+{% if error %}<p class="form-error" role="alert">{{ error|join:" " }}</p>{% endif %}
+<section class="card-grid">
+  {% for mission in occurrences %}
+    <article class="panel child-card">
+      <p class="eyebrow">
+        {% if mission.status == "assigned" %}{{ ui.status_assigned }}
+        {% elif mission.status == "submitted" %}{{ ui.status_submitted }}
+        {% elif mission.status == "approved" %}{{ ui.status_approved }}
+        {% elif mission.status == "rejected" %}{{ ui.status_rejected }}
+        {% else %}{{ ui.status_cancelled }}{% endif %}
+      </p>
+      <h2>{% if request.LANGUAGE_CODE == "ar" and mission.title_ar %}{{ mission.title_ar }}{% else %}{{ mission.title }}{% endif %}</h2>
+      {% if request.LANGUAGE_CODE == "ar" and mission.description_ar %}<p>{{ mission.description_ar }}</p>{% elif mission.description %}<p>{{ mission.description }}</p>{% endif %}
+      {% if request.LANGUAGE_CODE == "ar" and mission.category_name_ar %}<p>{{ mission.category_name_ar }}</p>{% elif mission.category_name %}<p>{{ mission.category_name }}</p>{% endif %}
+      {% if mission.due_date %}<p>{{ ui.due_date }} : {{ mission.due_date }}</p>{% endif %}
+      {% if mission.child_note %}<p>{{ mission.child_note }}</p>{% endif %}
+      {% if mission.parent_note %}<p>{{ ui.parent_note }} : {{ mission.parent_note }}</p>{% endif %}
+      {% if mission.status == "approved" %}
+        <p>{{ ui.coins }} : +{{ mission.coins_awarded }} · {{ ui.xp }} : +{{ mission.xp_awarded }}</p>
+      {% elif mission.status == "assigned" %}
+        <form method="post" action="{% url 'missions:submit' mission.pk %}" class="form-stack">
+          {% csrf_token %}
+          <label for="note-{{ mission.pk }}">{{ ui.child_note }}</label>
+          <textarea id="note-{{ mission.pk }}" name="note" maxlength="500" rows="2"></textarea>
+          <button class="primary-button" type="submit">{{ ui.mark_complete }}</button>
+        </form>
+      {% endif %}
+    </article>
+  {% empty %}
+    <p class="muted">{{ ui.no_missions }}</p>
+  {% endfor %}
+</section>
+{% endblock %}

@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}{{ ui.messages }} · {{ ui.app_name }}{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <p class="eyebrow">{{ ui.parent_space }}</p>
+  <h1>{{ ui.messages }}</h1>
+</section>
+<section class="panel form-panel">
+  <h2>{{ ui.compose_message }}</h2>
+  <form method="post" class="form-stack">
+    {% csrf_token %}
+    {% if form.non_field_errors %}<div class="form-error" role="alert">{{ form.non_field_errors }}</div>{% endif %}
+    {% for field in form %}
+      <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+      {{ field }}{{ field.errors }}
+    {% endfor %}
+    <button class="primary-button" type="submit">{{ ui.send_message }}</button>
+  </form>
+</section>
+
+<section class="hero">
+  <h2>{{ ui.message_history }}</h2>
+</section>
+<section class="card-grid">
+  {% for item in sent_messages %}
+    <article class="panel child-card">
+      <p class="muted">{{ item.created_at|date:"j F Y H:i" }}</p>
+      <p>{% if request.LANGUAGE_CODE == "ar" and item.content_ar %}{{ item.content_ar }}{% else %}{{ item.content }}{% endif %}</p>
+      {% if item.expires_at %}<p>{{ ui.message_expires }} : {{ item.expires_at|date:"j F Y H:i" }}</p>{% endif %}
+      <p>{{ ui.message_recipient }} :
+        {% for delivery in item.recipients.all %}
+          {{ delivery.child.first_name }} ( {% if delivery.read_at %}{{ ui.message_read }}{% else %}{{ ui.message_unread }}{% endif %} ){% if not forloop.last %}, {% endif %}
+        {% empty %}
+          {{ ui.no_messages }}
+        {% endfor %}
+      </p>
+    </article>
+  {% empty %}
+    <p class="muted">{{ ui.no_messages }}</p>
+  {% endfor %}
+</section>
+{% endblock %}

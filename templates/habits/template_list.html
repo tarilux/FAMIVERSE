@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}{{ ui.habits }} · {{ ui.app_name }}{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <p class="eyebrow">{{ ui.parent_space }}</p>
+  <h1>{{ ui.habit_management }}</h1>
+</section>
+<div class="button-row">
+  <a class="primary-button" href="{% url 'habits:template_create' %}">{{ ui.create_habit }}</a>
+  <a class="quiet-button" href="{% url 'habits:planning' %}">{{ ui.planning }}</a>
+  <a class="quiet-button" href="{% url 'habits:validation_list' %}">{{ ui.habit_validation }}</a>
+</div>
+<section class="card-grid section-heading">
+  {% for habit in habits %}
+    <article class="panel child-card">
+      <h2>{% if request.LANGUAGE_CODE == "ar" and habit.title_ar %}{{ habit.title_ar }}{% else %}{{ habit.title }}{% endif %}</h2>
+      {% if habit.description or habit.description_ar %}
+        <p>{% if request.LANGUAGE_CODE == "ar" and habit.description_ar %}{{ habit.description_ar }}{% else %}{{ habit.description }}{% endif %}</p>
+      {% endif %}
+      <p>
+        {% if habit.frequency == "daily" %}{{ ui.daily }}{% else %}{{ ui.weekly }}{% endif %}
+        ·
+        {% if habit.time_of_day == "morning" %}{{ ui.morning }}
+        {% elif habit.time_of_day == "afternoon" %}{{ ui.afternoon }}
+        {% elif habit.time_of_day == "evening" %}{{ ui.evening }}
+        {% else %}{{ ui.anytime }}{% endif %}
+        {% if habit.scheduled_time %} · {{ habit.scheduled_time|time:"H:i" }}{% endif %}
+      </p>
+      {% if habit.frequency == "weekly" %}
+        <p>{{ ui.weekdays }} : {{ habit.weekday_labels|join:", " }}</p>
+      {% endif %}
+      <p>{{ ui.children_assigned }} :
+        {% for child in habit.children.all %}{{ child.first_name }}{% if not forloop.last %}, {% endif %}{% empty %}—{% endfor %}
+      </p>
+      <p>{{ ui.coins }} : {{ habit.coins_reward }} · {{ ui.xp }} : {{ habit.xp_reward }}</p>
+      {% if habit.suspended_at %}<p class="muted">{{ ui.suspended }}</p>{% endif %}
+      <div class="button-row">
+        <a class="quiet-button" href="{% url 'habits:template_edit' habit.pk %}">{{ ui.edit }}</a>
+        <form method="post" action="{% url 'habits:template_toggle_suspension' habit.pk %}">
+          {% csrf_token %}
+          <button class="quiet-button" type="submit">{% if habit.suspended_at %}{{ ui.resume }}{% else %}{{ ui.suspend }}{% endif %}</button>
+        </form>
+      </div>
+    </article>
+  {% empty %}
+    <p class="muted">{{ ui.no_habits }}</p>
+  {% endfor %}
+</section>
+{% endblock %}

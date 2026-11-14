@@ -1,0 +1,75 @@
+{% load static %}
+<!doctype html>
+<html lang="{{ request.LANGUAGE_CODE|default:'fr' }}" dir="{{ ui_direction }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#21143f">
+  <title>{% block title %}{{ ui.app_name }}{% endblock %}</title>
+  <link rel="manifest" href="{% url 'pwa_manifest' %}">
+  <link rel="icon" href="{% static 'pwa/icon-192.png' %}" type="image/png">
+  <link rel="stylesheet" href="{% static 'css/app.css' %}">
+  <script>
+    if ("serviceWorker" in navigator && window.isSecureContext) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("{% url 'service_worker' %}", { scope: "/" })
+          .catch((error) => console.error("Service worker registration failed:", error));
+      });
+    }
+  </script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="{% url 'accounts:home' %}">{{ ui.app_name }}</a>
+    <div class="top-actions">
+      {% if user.is_authenticated %}
+        {% if user.role == "parent" %}
+          <a class="nav-link" href="{% url 'missions:template_list' %}">{{ ui.missions }}</a>
+          <a class="nav-link" href="{% url 'missions:validation_list' %}">{{ ui.pending_approvals }}</a>
+          <a class="nav-link" href="{% url 'habits:template_list' %}">{{ ui.habits }}</a>
+          <a class="nav-link" href="{% url 'habits:planning' %}">{{ ui.planning }}</a>
+          <a class="nav-link" href="{% url 'habits:validation_list' %}">{{ ui.habit_validation }}</a>
+          <a class="nav-link" href="{% url 'accounts:home' %}#children">{{ ui.progression }}</a>
+          <a class="nav-link" href="{% url 'rewards:catalog' %}">{{ ui.reward_catalog }}</a>
+          <a class="nav-link" href="{% url 'rewards:request_list' %}">{{ ui.reward_requests }}</a>
+          <a class="nav-link" href="{% url 'communications:sent_messages' %}">{{ ui.messages }}</a>
+          <a class="nav-link" href="{% url 'printcenter:center' %}">{{ ui.printing }}</a>
+          <a class="nav-link" href="{% url 'backupcenter:center' %}">{{ ui.backups }}</a>
+        {% else %}
+          <a class="nav-link" href="{% url 'missions:my_missions' %}">{{ ui.my_missions }}</a>
+          <a class="nav-link" href="{% url 'habits:my_planning' %}">{{ ui.my_planning }}</a>
+          <a class="nav-link" href="{% url 'progression:my_progress' %}">{{ ui.progression }}</a>
+          <a class="nav-link" href="{% url 'rewards:shop' %}">{{ ui.reward_shop }}</a>
+          <a class="nav-link" href="{% url 'communications:message_inbox' %}">
+            {{ ui.my_messages }}{% if unread_message_count %} <span class="notification-count">{{ unread_message_count }}</span>{% endif %}
+          </a>
+          <a class="nav-link" href="{% url 'printcenter:center' %}">{{ ui.printing }}</a>
+        {% endif %}
+        <a class="nav-link" href="{% url 'communications:notification_list' %}">
+          {{ ui.notifications }}{% if unread_notification_count %} <span class="notification-count">{{ unread_notification_count }}</span>{% endif %}
+        </a>
+      {% endif %}
+      <form class="language-switch" action="{% url 'set_language' %}" method="post">
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ request.get_full_path }}">
+        <button type="submit" name="language" value="fr" aria-label="Français">FR</button>
+        <button type="submit" name="language" value="ar" aria-label="العربية">ع</button>
+      </form>
+      {% if user.is_authenticated %}
+        <form action="{% url 'accounts:logout' %}" method="post">
+          {% csrf_token %}
+          <button class="quiet-button" type="submit">{{ ui.logout }}</button>
+        </form>
+      {% endif %}
+    </div>
+  </header>
+  <main class="page">
+    {% if messages %}
+      <section class="notice-list" aria-live="polite">
+        {% for message in messages %}<p class="notice">{{ message }}</p>{% endfor %}
+      </section>
+    {% endif %}
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>

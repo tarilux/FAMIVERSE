@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}{{ ui.confirm_title }} · {{ ui.app_name }}{% endblock %}
+
+{% block content %}
+<section class="panel form-panel">
+  <h1>{{ ui.confirm_title }}</h1>
+  <p>{{ ui.confirm_prompt }}</p>
+  <ul>
+    {% for mission in occurrences %}
+      <li>{% if request.LANGUAGE_CODE == "ar" and mission.title_ar %}{{ mission.title_ar }}{% else %}{{ mission.title }}{% endif %} — {{ mission.child.first_name }}</li>
+    {% endfor %}
+  </ul>
+  <form method="post" action="{% url 'missions:decide' %}" class="form-stack">
+    {% csrf_token %}
+    {% for id in ids %}<input type="hidden" name="occurrence_ids" value="{{ id }}">{% endfor %}
+    <input type="hidden" name="decision" value="{{ decision }}">
+    <label for="parent-note">{{ ui.parent_note }}</label>
+    <textarea id="parent-note" name="parent_note" maxlength="500" rows="3"></textarea>
+    <label class="confirmation-check">
+      <input type="checkbox" name="confirm" value="yes" required>
+      <span>{{ ui.confirm_prompt }}</span>
+    </label>
+    <div class="button-row">
+      <button class="primary-button" type="submit">{{ ui.confirm_action }}</button>
+      <a class="quiet-button" href="{% url 'missions:validation_list' %}">{{ ui.cancel }}</a>
+    </div>
+  </form>
+</section>
+{% endblock %}

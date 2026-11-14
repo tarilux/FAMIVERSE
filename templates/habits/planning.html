@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+
+{% block title %}{% if child_planning %}{{ ui.my_planning }}{% else %}{{ ui.planning }}{% endif %} · {{ ui.app_name }}{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <p class="eyebrow">{% if child_planning %}{{ ui.child_space }}{% else %}{{ ui.parent_space }}{% endif %}</p>
+  <h1>{% if child_planning %}{{ ui.my_planning }}{% else %}{{ ui.planning }}{% endif %}</h1>
+</section>
+<section class="panel child-card">
+  <form method="get" class="filter-row">
+    <label>
+      {{ ui.view }}
+      <select name="view">
+        <option value="day" {% if view_mode == "day" %}selected{% endif %}>{{ ui.today }}</option>
+        <option value="week" {% if view_mode == "week" %}selected{% endif %}>{{ ui.week }}</option>
+        {% if not child_planning %}<option value="month" {% if view_mode == "month" %}selected{% endif %}>{{ ui.month }}</option>{% endif %}
+      </select>
+    </label>
+    <label>
+      {{ ui.period }}
+      <input type="date" name="date" value="{{ selected_date|date:'Y-m-d' }}">
+    </label>
+    {% if not child_planning %}
+      <label>
+        {{ ui.children_assigned }}
+        <select name="child">
+          <option value="">{{ ui.children }}</option>
+          {% for item in children %}
+            <option value="{{ item.pk }}" {% if selected_child.pk == item.pk %}selected{% endif %}>{{ item.first_name }}</option>
+          {% endfor %}
+        </select>
+      </label>
+    {% endif %}
+    <button class="primary-button" type="submit">{{ ui.view }}</button>
+  </form>
+</section>
+
+{% for day in days %}
+  <section class="panel planning-day">
+    <h2>{{ day.date|date:"l d F Y" }}</h2>
+    <div class="planning-items">
+      {% for mission in day.missions %}
+        <article class="planning-item">
+          <strong>{% if request.LANGUAGE_CODE == "ar" and mission.title_ar %}{{ mission.title_ar }}{% else %}{{ mission.title }}{% endif %}</strong>
+          {% if not child_planning %}<p>{{ mission.child.first_name }}</p>{% endif %}
+          <p>
+            {% if mission.status == "assigned" %}{{ ui.status_assigned }}
+            {% elif mission.status == "submitted" %}{{ ui.status_submitted }}
+            {% elif mission.status == "approved" %}{{ ui.status_approved }}
+            {% elif mission.status == "rejected" %}{{ ui.status_rejected }}
+            {% else %}{{ ui.status_cancelled }}{% endif %}
+          </p>
+        </article>
+      {% endfor %}
+      {% for habit in day.habits %}
+        <article class="planning-item">
+          <strong>{% if request.LANGUAGE_CODE == "ar" and habit.title_ar %}{{ habit.title_ar }}{% else %}{{ habit.title }}{% endif %}</strong>
+          {% if not child_planning %}<p>{{ habit.child.first_name }}</p>{% endif %}
+          <p>
+            {% if habit.time_of_day == "morning" %}{{ ui.morning }}
+            {% elif habit.time_of_day == "afternoon" %}{{ ui.afternoon }}
+            {% elif habit.time_of_day == "evening" %}{{ ui.evening }}
+            {% else %}{{ ui.anytime }}{% endif %}
+            {% if habit.scheduled_time %} · {{ habit.scheduled_time|time:"H:i" }}{% endif %}
+            ·
+            {% if habit.status == "planned" %}{{ ui.habit_status_planned }}
+            {% elif habit.status == "submitted" %}{{ ui.habit_status_submitted }}
+            {% elif habit.status == "approved" %}{{ ui.habit_status_approved }}
+            {% elif habit.status == "rejected" %}{{ ui.habit_status_rejected }}
+            {% else %}{{ ui.habit_status_cancelled }}{% endif %}
+          </p>
+          {% if habit.description or habit.description_ar %}
+            <p>{% if request.LANGUAGE_CODE == "ar" and habit.description_ar %}{{ habit.description_ar }}{% else %}{{ habit.description }}{% endif %}</p>
+          {% endif %}
+          {% if child_planning and habit.status == "planned" %}
+            <form method="post" action="{% url 'habits:submit' habit.pk %}" class="form-stack">
+              {% csrf_token %}
+              <label for="habit-note-{{ habit.pk }}">{{ ui.child_note }}</label>
+              <textarea id="habit-note-{{ habit.pk }}" name="note" maxlength="500" rows="2"></textarea>
+              <button class="primary-button" type="submit">{{ ui.submit_habit }}</button>
+            </form>
+          {% endif %}
+          {% if habit.child_note %}<p>{{ habit.child_note }}</p>{% endif %}
+          {% if habit.parent_note %}<p>{{ habit.parent_note }}</p>{% endif %}
+        </article>
+      {% endfor %}
+      {% if not day.missions and not day.habits %}
+        <p class="muted">{{ ui.no_planned_items }}</p>
+      {% endif %}
+    </div>
+  </section>
+{% endfor %}
+
+<section class="hero">
+  <h2>{{ ui.upcoming_missions }}</h2>
+  {% for mission in upcoming_missions %}
+    <article class="panel planning-item">
+      <strong>{% if request.LANGUAGE_CODE == "ar" and mission.title_ar %}{{ mission.title_ar }}{% else %}{{ mission.title }}{% endif %}</strong>
+      <p>{{ mission.due_date|date:"l d F Y" }}{% if not child_planning %} · {{ mission.child.first_name }}{% endif %}</p>
+    </article>
+  {% empty %}
+    <p class="muted">{{ ui.no_upcoming_missions }}</p>
+  {% endfor %}
+</section>
+{% endblock %}

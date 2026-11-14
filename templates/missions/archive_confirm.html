@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block title %}{{ ui.archive }} · {{ ui.app_name }}{% endblock %}
+
+{% block content %}
+<section class="panel form-panel">
+  <h1>{{ ui.archive }} : {{ template.title }}</h1>
+  <p>{{ ui.archive_prompt }}</p>
+  <form method="post" action="{% url 'missions:template_archive' template.pk %}" class="form-stack">
+    {% csrf_token %}
+    <label class="confirmation-check">
+      <input type="checkbox" name="confirm" value="yes" required>
+      <span>{{ ui.archive_prompt }}</span>
+    </label>
+    <div class="button-row">
+      <button class="primary-button" type="submit">{{ ui.archive }}</button>
+      <a class="quiet-button" href="{% url 'missions:template_list' %}">{{ ui.cancel }}</a>
+    </div>
+  </form>
+</section>
+{% endblock %}

@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block title %}{{ ui.reward_decision }} · {{ ui.app_name }}{% endblock %}
+
+{% block content %}
+<section class="panel form-panel">
+  <h1>{{ ui.reward_decision }}</h1>
+  {% if error %}<p class="form-error" role="alert">{{ error|join:" " }}</p>{% endif %}
+  <p>{{ ui.reward_decision_prompt }}</p>
+  <p><strong>{% if request.LANGUAGE_CODE == "ar" and reward_request.reward.name_ar %}{{ reward_request.reward.name_ar }}{% else %}{{ reward_request.reward.name }}{% endif %}</strong></p>
+  <p>{{ reward_request.child.first_name }} · {{ ui.price }} : {{ reward_request.price_coins }} {{ ui.coins }}</p>
+  <form method="post" class="form-stack">
+    {% csrf_token %}
+    <label for="parent-note">{{ ui.parent_note }}</label>
+    <textarea id="parent-note" name="parent_note" maxlength="500" rows="3"></textarea>
+    <label class="confirmation-check">
+      <input type="checkbox" name="confirm" value="yes" required>
+      <span>{{ ui.reward_decision_prompt }}</span>
+    </label>
+    <div class="button-row">
+      <button class="primary-button" type="submit">
+        {% if decision == "approve" %}{{ ui.reward_accept }}{% else %}{{ ui.reward_reject }}{% endif %}
+      </button>
+      <a class="quiet-button" href="{% url 'rewards:request_list' %}">{{ ui.cancel }}</a>
+    </div>
+  </form>
+</section>
+{% endblock %}

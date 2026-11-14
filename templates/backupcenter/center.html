@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block title %}{{ ui.backups }} · {{ ui.app_name }}{% endblock %}
+{% block content %}
+<section class="hero">
+  <p class="eyebrow">{{ ui.backups }}</p>
+  <h1>{{ ui.backup_center_title }}</h1>
+  <p>{{ ui.backup_center_description }}</p>
+</section>
+
+<p class="notice">{{ ui.backup_storage_notice }}</p>
+
+<section class="panel form-panel">
+  <h2>{{ ui.backup_schedule }}</h2>
+  <form class="form-stack" method="post" action="{% url 'backupcenter:save_settings' %}">
+    {% csrf_token %}
+    {{ settings_form.non_field_errors }}
+    {% for field in settings_form %}
+      <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+      {{ field }}
+      {{ field.errors }}
+    {% endfor %}
+    <button class="primary-button" type="submit">{{ ui.save }}</button>
+  </form>
+</section>
+
+<section class="panel form-panel">
+  <h2>{{ ui.backup_manual_title }}</h2>
+  <p>{{ ui.backup_manual_description }}</p>
+  <form method="post" action="{% url 'backupcenter:create_manual' %}">
+    {% csrf_token %}
+    <button class="primary-button" type="submit">{{ ui.backup_create }}</button>
+  </form>
+</section>
+
+<section>
+  <h2>{{ ui.backup_history }}</h2>
+  {% if runs %}
+    <div class="planning-items">
+      {% for run in runs %}
+        <article class="panel planning-item">
+          <div class="section-heading">
+            <h3>
+              {% if run.kind == "manual" %}{{ ui.backup_manual }}
+              {% elif run.kind == "scheduled" %}{{ ui.backup_automatic }}
+              {% elif run.kind == "imported" %}{{ ui.backup_imported }}
+              {% elif run.kind == "pre_restore" %}{{ ui.backup_pre_restore }}
+              {% else %}{{ ui.backup_restore_event }}{% endif %}
+            </h3>
+            <span>
+              {% if run.status == "completed" %}{{ ui.backup_completed }}
+              {% elif run.status == "failed" %}{{ ui.backup_failed }}
+              {% elif run.status == "pruned" %}{{ ui.backup_pruned }}
+              {% else %}{{ ui.backup_running }}{% endif %}
+            </span>
+          </div>
+          <p class="muted">{{ run.created_at|date:"d/m/Y H:i" }} · {{ run.size_bytes|filesizeformat }}</p>
+          {% if run.error_message %}<p class="form-error">{{ run.error_message }}</p>{% endif %}
+          {% if run.status == "completed" and run.file_name %}
+            <a class="primary-button" href="{% url 'backupcenter:download' run.pk %}">{{ ui.backup_download }}</a>
+          {% endif %}
+        </article>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="muted">{{ ui.backup_no_history }}</p>
+  {% endif %}
+</section>
+
+<section class="panel form-panel">
+  <h2>{{ ui.backup_restore_title }}</h2>
+  <p class="notice">{{ ui.backup_restore_warning }}</p>
+  <form class="form-stack" method="post" enctype="multipart/form-data" action="{% url 'backupcenter:restore' %}">
+    {% csrf_token %}
+    {{ restore_form.non_field_errors }}
+    {% for field in restore_form %}
+      <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+      {{ field }}
+      {{ field.errors }}
+    {% endfor %}
+    <button class="primary-button" type="submit">{{ ui.backup_restore_button }}</button>
+  </form>
+</section>
+{% endblock %}

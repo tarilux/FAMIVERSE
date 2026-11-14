@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block title %}{{ ui.pending_approvals }} · {{ ui.app_name }}{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <p class="eyebrow">{{ ui.parent_space }}</p>
+  <h1>{{ ui.pending_approvals }}</h1>
+</section>
+{% if error %}<p class="form-error" role="alert">{{ error|join:" " }}</p>{% endif %}
+{% if occurrences %}
+  <form method="post" action="{% url 'missions:decide' %}" class="form-stack">
+    {% csrf_token %}
+    <section class="card-grid">
+      {% for mission in occurrences %}
+        <label class="panel selection-card">
+          <input type="checkbox" name="occurrence_ids" value="{{ mission.pk }}">
+          <span>
+            <strong>{% if request.LANGUAGE_CODE == "ar" and mission.title_ar %}{{ mission.title_ar }}{% else %}{{ mission.title }}{% endif %}</strong>
+            <span>{{ mission.child.first_name }}</span>
+            {% if mission.child_note %}<span>{{ mission.child_note }}</span>{% endif %}
+          </span>
+        </label>
+      {% endfor %}
+    </section>
+    <div class="button-row">
+      <button class="primary-button" type="submit" name="decision" value="approve">{{ ui.approve }}</button>
+      <button class="quiet-button" type="submit" name="decision" value="reject">{{ ui.reject }}</button>
+    </div>
+  </form>
+{% else %}
+  <p class="muted">{{ ui.no_pending_approvals }}</p>
+{% endif %}
+{% endblock %}

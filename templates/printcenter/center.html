@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}{{ ui.printing }} · {{ ui.app_name }}{% endblock %}
+{% block content %}
+<section class="hero">
+  <p class="eyebrow">{{ ui.printing }}</p>
+  <h1>{{ ui.print_center_title }}</h1>
+  <p>{{ ui.print_center_description }}</p>
+</section>
+
+<section class="panel form-panel">
+  <h2>{{ ui.print_request_title }}</h2>
+  <p class="notice">{{ ui.print_hardware_pending }}</p>
+  <form class="form-stack" method="post" action="{% url 'printcenter:create_ticket' %}">
+    {% csrf_token %}
+    {% for field in request_form %}
+      <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+      {{ field }}
+      {{ field.errors }}
+    {% endfor %}
+    {{ request_form.non_field_errors }}
+    <button class="primary-button" type="submit">{{ ui.print_create_preview }}</button>
+  </form>
+</section>
+
+{% if user.role == "parent" %}
+  <section class="section-heading">
+    <h2>{{ ui.print_settings }}</h2>
+    <a class="primary-button" href="{% url 'printcenter:settings' %}">{{ ui.print_configure }}</a>
+  </section>
+{% endif %}
+
+<section>
+  <h2>{{ ui.print_queue_history }}</h2>
+  {% if jobs %}
+    <div class="planning-items">
+      {% for job in jobs %}
+        <article class="panel planning-item">
+          <div class="section-heading">
+            <h3>{{ job.child.first_name }} —
+              {% if job.kind == "missions" %}{{ ui.print_missions_title }}{% else %}{{ ui.print_progress_title }}{% endif %}
+            </h3>
+            <span>
+              {% if job.status == "waiting_printer" %}{{ ui.print_waiting_status }}
+              {% elif job.status == "printed" %}{{ ui.print_printed_status }}
+              {% elif job.status == "failed" %}{{ ui.print_failed_status }}
+              {% else %}{{ ui.print_cancelled_status }}{% endif %}
+            </span>
+          </div>
+          <p class="muted">{{ job.created_at|date:"d/m/Y H:i" }}</p>
+          <div class="button-row">
+            <a class="primary-button" href="{% url 'printcenter:preview' job.pk %}">{{ ui.print_view_preview }}</a>
+            {% if job.status == "waiting_printer" %}
+              <form method="post" action="{% url 'printcenter:cancel' job.pk %}">
+                {% csrf_token %}
+                <button class="quiet-button" type="submit">{{ ui.print_cancel }}</button>
+              </form>
+            {% endif %}
+          </div>
+        </article>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="muted">{{ ui.print_no_jobs }}</p>
+  {% endif %}
+</section>
+{% endblock %}

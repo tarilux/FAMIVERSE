@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %}{{ ui.add_child }} · {{ ui.app_name }}{% endblock %}
+
+{% block content %}
+<section class="panel form-panel">
+  <p class="eyebrow">{{ ui.parent_space }}</p>
+  <h1>{{ ui.add_child }}</h1>
+  <form method="post" enctype="multipart/form-data" class="form-stack">
+    {% csrf_token %}
+    {% if form.non_field_errors %}<div class="form-error">{{ form.non_field_errors }}</div>{% endif %}
+    <label for="{{ form.first_name.id_for_label }}">{{ ui.first_name }}</label>
+    {{ form.first_name }}{{ form.first_name.errors }}
+    <label for="{{ form.username.id_for_label }}">{{ ui.username }}</label>
+    {{ form.username }}{{ form.username.errors }}
+    <label for="{{ form.date_of_birth.id_for_label }}">{{ ui.birth_date }}</label>
+    {{ form.date_of_birth }}{{ form.date_of_birth.errors }}
+    <label for="{{ form.pin.id_for_label }}">{{ ui.pin }}</label>
+    {{ form.pin }}{{ form.pin.errors }}
+    <label for="{{ form.language.id_for_label }}">{{ ui.language }}</label>
+    <select name="{{ form.language.name }}" id="{{ form.language.id_for_label }}">
+      <option value="fr" {% if form.language.value == "fr" or not form.language.value %}selected{% endif %}>{{ ui.french }}</option>
+      <option value="ar" {% if form.language.value == "ar" %}selected{% endif %}>{{ ui.arabic }}</option>
+    </select>
+    {{ form.language.errors }}
+    <label for="{{ form.maturity.id_for_label }}">{{ ui.maturity }}</label>
+    <select name="{{ form.maturity.name }}" id="{{ form.maturity.id_for_label }}">
+      <option value="standard" {% if form.maturity.value == "standard" or not form.maturity.value %}selected{% endif %}>{{ ui.standard }}</option>
+      <option value="simplified" {% if form.maturity.value == "simplified" %}selected{% endif %}>{{ ui.simplified }}</option>
+      <option value="autonomy" {% if form.maturity.value == "autonomy" %}selected{% endif %}>{{ ui.autonomy }}</option>
+    </select>
+    {{ form.maturity.errors }}
+    <label for="{{ form.avatar.id_for_label }}">{{ ui.avatar }}</label>
+    {{ form.avatar }}{{ form.avatar.errors }}
+    <div class="button-row">
+      <button class="primary-button" type="submit">{{ ui.create_profile }}</button>
+      <a class="quiet-button" href="{% url 'accounts:home' %}">{{ ui.cancel }}</a>
+    </div>
+  </form>
+</section>
+{% endblock %}

@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}{{ ui.rewards }} · {{ ui.app_name }}{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <p class="eyebrow">{{ ui.parent_space }}</p>
+  <h1>{{ ui.reward_catalog }}</h1>
+</section>
+<div class="button-row">
+  <a class="primary-button" href="{% url 'rewards:reward_create' %}">{{ ui.create_reward }}</a>
+  <a class="quiet-button" href="{% url 'rewards:request_list' %}">{{ ui.reward_requests }}</a>
+</div>
+<section class="card-grid section-heading">
+  {% for reward in rewards %}
+    <article class="panel child-card">
+      <p class="eyebrow">
+        {% if reward.category == "screens" %}{{ ui.reward_screens }}
+        {% elif reward.category == "food" %}{{ ui.reward_food }}
+        {% elif reward.category == "privileges" %}{{ ui.reward_privileges }}
+        {% elif reward.category == "outings" %}{{ ui.reward_outings }}
+        {% else %}{{ ui.reward_material }}{% endif %}
+      </p>
+      <h2>{% if request.LANGUAGE_CODE == "ar" and reward.name_ar %}{{ reward.name_ar }}{% else %}{{ reward.name }}{% endif %}</h2>
+      {% if reward.description or reward.description_ar %}
+        <p>{% if request.LANGUAGE_CODE == "ar" and reward.description_ar %}{{ reward.description_ar }}{% else %}{{ reward.description }}{% endif %}</p>
+      {% endif %}
+      <p>{{ ui.price }} : {{ reward.price_coins }} {{ ui.coins }}</p>
+      <div class="button-row">
+        <a class="quiet-button" href="{% url 'rewards:reward_edit' reward.pk %}">{{ ui.edit }}</a>
+        <a class="quiet-button" href="{% url 'rewards:reward_archive' reward.pk %}">{{ ui.archive }}</a>
+      </div>
+    </article>
+  {% empty %}
+    <p class="muted">{{ ui.no_rewards }}</p>
+  {% endfor %}
+</section>
+{% endblock %}

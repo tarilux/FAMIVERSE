@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}{{ ui.print_settings }} · {{ ui.app_name }}{% endblock %}
+{% block content %}
+<section class="hero">
+  <p class="eyebrow">{{ ui.printing }}</p>
+  <h1>{{ ui.print_settings }}</h1>
+  <p>{{ ui.print_settings_description }}</p>
+</section>
+
+<p class="notice">{{ ui.print_automatic_blocked }}</p>
+<section class="panel form-panel">
+  <h2>{{ ui.print_schedule_and_quality }}</h2>
+  <form class="form-stack" method="post" action="{% url 'printcenter:save_settings' %}">
+    {% csrf_token %}
+    {{ settings_form.non_field_errors }}
+    {% for field in settings_form %}
+      <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+      {{ field }}
+      {{ field.errors }}
+    {% endfor %}
+    <p class="muted">{{ ui.print_calendar_confirmation_hint }}</p>
+    <button class="primary-button" type="submit">{{ ui.save }}</button>
+  </form>
+</section>
+
+<section>
+  <h2>{{ ui.print_calendar }}</h2>
+  <p class="muted">{{ ui.print_calendar_manual_hint }}</p>
+  <section class="panel form-panel">
+    <form class="form-stack" method="post" action="{% url 'printcenter:add_calendar_block' %}">
+      {% csrf_token %}
+      {{ calendar_form.non_field_errors }}
+      {% for field in calendar_form %}
+        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+        {{ field }}
+        {{ field.errors }}
+      {% endfor %}
+      <button class="primary-button" type="submit">{{ ui.print_add_period }}</button>
+    </form>
+  </section>
+  {% if calendar_blocks %}
+    <div class="planning-items">
+      {% for block in calendar_blocks %}
+        <article class="panel planning-item">
+          <strong>
+            {% if block.kind == "school_break" %}{{ ui.print_school_break }}{% else %}{{ ui.print_public_holiday }}{% endif %}
+            — {{ block.label }}
+          </strong>
+          <p>{{ block.starts_on|date:"d/m/Y" }} – {{ block.ends_on|date:"d/m/Y" }}</p>
+          <form method="post" action="{% url 'printcenter:delete_calendar_block' block.pk %}">
+            {% csrf_token %}
+            <button class="quiet-button" type="submit">{{ ui.print_remove_period }}</button>
+          </form>
+        </article>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="muted">{{ ui.print_no_calendar_periods }}</p>
+  {% endif %}
+</section>
+{% endblock %}
